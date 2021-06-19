@@ -3,20 +3,20 @@ import pandas as pd
 from movie_prediction.utils import sanitize_string_column, extract_names
 from movie_prediction.constants import *
 
-__all__ = ['load_actor_character_data', 'load_movie_line_data']
+__all__ = ['load_principal_character_data', 'load_movie_line_data']
 
 
-def load_actor_character_data() -> pd.DataFrame:
+def load_principal_character_data() -> pd.DataFrame:
     """
     This function reads the IMBD movie metadata dataset to create a dataframe which maps
-    actors by their birth name to characters they played in a movie.
+    principals by their birth name to characters they played in a movie.
 
     ref: https://www.kaggle.com/stefanoleone992/imdb-extensive-dataset?select=IMDb+title_principals.csv
     :return:
     """
     # First read all movie characters
     movie_characters = pd.read_csv(
-        '../data/imdb_movie_meta/IMDb title_principals.csv',
+        DATA_DIR + '/imdb_movie_meta/IMDb title_principals.csv',
         converters={"characters": lambda x: x.strip("[]").replace('"', '').split(", ")})
     movie_characters = movie_characters[
         movie_characters['category'].isin(['actor', 'actress'])
@@ -24,9 +24,9 @@ def load_actor_character_data() -> pd.DataFrame:
         ].explode('characters')
 
     # Next read all movie principals and merge
-    movie_actors = pd.read_csv('../data/imdb_movie_meta/IMDb names.csv')
+    movie_principals = pd.read_csv('../data/imdb_movie_meta/IMDb names.csv')
     movie_characters = movie_characters.merge(
-        movie_actors[['imdb_name_id', 'birth_name']], on='imdb_name_id')
+        movie_principals[['imdb_name_id', 'birth_name']], on='imdb_name_id')
 
     # Then read all movie titles and merge
     movie_titles = pd.read_csv('../data/imdb_movie_meta/IMDb movies.csv', converters={'year': str})
@@ -67,7 +67,7 @@ def load_movie_line_data() -> pd.DataFrame:
     """
     # Read in movie lines
     movie_lines = pd.read_csv(
-        '../data/cornell_movie_scripts/movie_lines.tsv',
+        DATA_DIR + '/cornell_movie_scripts/movie_lines.tsv',
         sep='\t', encoding='utf-8',
         error_bad_lines=False, warn_bad_lines=False,
         names=['lineID', 'characterID', 'movieID',
@@ -91,6 +91,6 @@ def load_movie_line_data() -> pd.DataFrame:
     movie_lines[TITLE] = sanitize_string_column(
         movie_lines['movie title'], upper=True, alphanumeric_only=True, strip=True, whitespace=True)
     movie_lines[YEAR] = movie_lines['movie year'].str.extract(r'.*(\d{4}).*').astype(int)[0]
-    movie_lines[UTTERANCE] = sanitize_string_column(movie_lines['utterance'], whitespace=True)
+    movie_lines[UTTERANCE] = sanitize_string_column(movie_lines['utterance'].astype(str), whitespace=True)
 
     return movie_lines[[CHARAC, TITLE, YEAR, UTTERANCE]]

@@ -13,6 +13,7 @@ setup(
     ),
     python_requires='>=python3.7',
     install_requires=[
-        'seaborn', 'transformers', 'pandas', 'umap-learn'
+        'seaborn', 'transformers', 'pandas', 'umap-learn',
+        'fastapi[all]', 'tqdm', 'streamlit'
     ]
 )

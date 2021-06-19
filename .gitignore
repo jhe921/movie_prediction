@@ -1,5 +1,7 @@
 *.pyc
 tests/*
 data/*
+models/*
 *.egg-info*
 *.ipynb_checkpoints*
+*.idea*
